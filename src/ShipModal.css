@@ -1,0 +1,113 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: linear-gradient(145deg, #1a3a5c, #0d2137);
+    border-radius: 16px;
+    padding: 30px;
+    min-width: 320px;
+    box-shadow: 0 0 40px rgba(79, 195, 247, 0.3), 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 2px solid #1e88e5;
+}
+
+.modal h2 {
+    color: #4fc3f7;
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.modal-info {
+    color: #90caf9;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.modal input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #1e88e5;
+    border-radius: 8px;
+    background: rgba(13, 33, 55, 0.8);
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.modal input:focus {
+    border-color: #4fc3f7;
+    box-shadow: 0 0 15px rgba(79, 195, 247, 0.4);
+}
+
+.modal input::placeholder {
+    color: #5c8ab5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.create-btn {
+    background: linear-gradient(145deg, #43a047, #2e7d32);
+    color: white;
+    box-shadow: 0 4px 15px rgba(67, 160, 71, 0.4);
+}
+
+.create-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 160, 71, 0.6);
+}
+
+.create-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.delete-btn {
+    background: linear-gradient(145deg, #e53935, #c62828);
+    color: white;
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+}
+
+.delete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 57, 53, 0.6);
+}
+
+.cancel-btn {
+    background: linear-gradient(145deg, #455a64, #37474f);
+    color: white;
+    box-shadow: 0 4px 15px rgba(69, 90, 100, 0.4);
+}
+
+.cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(69, 90, 100, 0.6);
+}
+
