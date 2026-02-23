@@ -112,7 +112,7 @@ export async function radar(shipId) {
         const response = await fetch(`${API}/radar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shipid: shipId })
+            body: JSON.stringify({ shipid: "#3#Test" })
         });
         console.log("Radar aktiviert!");
         return response.ok;

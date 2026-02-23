@@ -61,8 +61,7 @@ export default function App() {
     }
 
     // Neues Schiff erstellen
-    async function handleCreateShip(name, x, y) {
-        const port = getNextAvailablePort()
+    async function handleCreateShip(name, x, y, port) {
         await createShip(name, x, y, "S", port)
         setUsedPorts(new Set([...usedPorts, port]))
         await load()
