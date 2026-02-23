@@ -110,8 +110,8 @@
     box-shadow: 0 0 20px rgba(239, 83, 80, 0.8);
 }
 
-/* Schiff in der Mitte */
-.compass-center {
+/* Scan-Button in der Mitte */
+.compass-center.scan-btn {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -122,15 +122,40 @@
     border-radius: 50%;
     border: 3px solid #4fc3f7;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 20px rgba(79, 195, 247, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    gap: 2px;
 }
 
-.ship-indicator {
-    font-size: 2.5rem;
-    transition: transform 0.3s ease;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+.compass-center.scan-btn:hover:not(:disabled) {
+    background: radial-gradient(circle, #2a5a8c 0%, #1d3157 100%);
+    border-color: #81d4fa;
+    box-shadow: 0 0 30px rgba(79, 195, 247, 0.7);
+}
+
+.compass-center.scan-btn:active:not(:disabled) {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.compass-center.scan-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.scan-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 8px rgba(79, 195, 247, 0.8));
+}
+
+.scan-text {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #4fc3f7;
+    letter-spacing: 1px;
 }
 
 /* Taucher Button */

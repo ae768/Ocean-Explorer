@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import Map from "./Map"
 import ControlPanel from "./ControlPanel"
 import ShipModal from "./ShipModal"
-import { getShips, moveShip, moveShipDirection, deployDiver, getDivers, createShip, deleteShip, navigateShip } from "./api"
+import { getShips, moveShipDirection, deployDiver, getDivers, createShip, deleteShip, navigateShip } from "./api"
 import "./App.css"
+
+const BASE_PORT = 7000
 
 export default function App() {
     const [ships, setShips] = useState([])
@@ -11,6 +13,15 @@ export default function App() {
     const [selectedShip, setSelectedShip] = useState(null)
     const [treasures, setTreasures] = useState(0)
     const [modal, setModal] = useState(null) // { x, y, existingShip }
+    const [usedPorts, setUsedPorts] = useState(new Set())
+
+    function getNextAvailablePort() {
+        let port = BASE_PORT
+        while (usedPorts.has(port)) {
+            port++
+        }
+        return port
+    }
 
     async function load() {
         const newShips = await getShips()
@@ -51,12 +62,20 @@ export default function App() {
 
     // Neues Schiff erstellen
     async function handleCreateShip(name, x, y) {
-        await createShip(name, x, y)
+        const port = getNextAvailablePort()
+        await createShip(name, x, y, "S", port)
+        setUsedPorts(new Set([...usedPorts, port]))
         await load()
     }
 
     // Schiff löschen
     async function handleDeleteShip(id) {
+        const ship = ships.find(s => s.id === id)
+        if (ship && ship.port) {
+            const newUsedPorts = new Set(usedPorts)
+            newUsedPorts.delete(ship.port)
+            setUsedPorts(newUsedPorts)
+        }
         if (selectedShip?.id === id) {
             setSelectedShip(null)
         }
@@ -123,6 +142,7 @@ export default function App() {
                     x={modal.x}
                     y={modal.y}
                     existingShip={modal.existingShip}
+                    nextPort={getNextAvailablePort()}
                     onClose={() => setModal(null)}
                     onCreateShip={handleCreateShip}
                     onDeleteShip={handleDeleteShip}

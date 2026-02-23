@@ -1,6 +1,6 @@
 import { useState } from "react"
 import "./ControlPanel.css"
-import {navigateShip} from "./api";
+import {navigateShip, scan} from "./api";
 
 export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDiver, ships, onSelectShip, onDeleteShip }) {
     const [direction, setDirection] = useState(0) // Grad (0 = Nord)
@@ -59,16 +59,16 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
                         </button>
                     ))}
 
-                    {/* Zeiger in der Mitte */}
-                    <div className="compass-center">
-                        <div
-                            className="compass-needle"
-                            style={{ transform: `rotate(${direction}deg)` }}
-                        >
-                            <div className="needle-tip"></div>
-                            <div className="needle-base"></div>
-                        </div>
-                    </div>
+                    {/* Scan-Button in der Mitte */}
+                    <button
+                        className="compass-center scan-btn"
+                        onClick={() => selectedShip && scan(selectedShip.id)}
+                        disabled={!selectedShip}
+                        title="Sektor scannen"
+                    >
+                        <span className="scan-icon">📡</span>
+                        <span className="scan-text">SCAN</span>
+                    </button>
                 </div>
             </div>
 

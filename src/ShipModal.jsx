@@ -1,7 +1,7 @@
 import { useState } from "react"
 import "./ShipModal.css"
 
-export default function ShipModal({ x, y, onClose, onCreateShip, onDeleteShip, existingShip }) {
+export default function ShipModal({ x, y, onClose, onCreateShip, onDeleteShip, existingShip, nextPort }) {
     const [shipName, setShipName] = useState("")
 
     function handleCreate() {
@@ -25,6 +25,7 @@ export default function ShipModal({ x, y, onClose, onCreateShip, onDeleteShip, e
                     <>
                         <h2>🚢 {existingShip.name}</h2>
                         <p className="modal-info">Position: ({x}, {y})</p>
+                        <p className="modal-info">Port: {existingShip.port}</p>
                         <div className="modal-actions">
                             <button className="delete-btn" onClick={handleDelete}>
                                 🗑️ Schiff löschen
@@ -38,6 +39,7 @@ export default function ShipModal({ x, y, onClose, onCreateShip, onDeleteShip, e
                     <>
                         <h2>🚢 Neues Schiff erstellen</h2>
                         <p className="modal-info">Position: ({x}, {y})</p>
+                        <p className="modal-info">Port: {nextPort}</p>
                         <input
                             type="text"
                             placeholder="Schiffsname eingeben..."
