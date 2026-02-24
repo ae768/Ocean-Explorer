@@ -1,62 +1,69 @@
-// Backend-URL - Passe den Port an deinen Javalin-Server an!
-const BACKEND_URL = "http://localhost:7000"
-const API = `${BACKEND_URL}/api`
+// ============================================================================
+// API.JS - Alle HTTP-Funktionen für die Kommunikation mit dem Javalin-Backend
+// ============================================================================
+
+// Backend-URL - für Verbindung zum Backend
+const BACKEND_URL = "http://localhost:8080"
+const API = `${BACKEND_URL}/api` // Basis-URL für alle API-Aufrufe
 
 // ============================================
 // ALLE SCHIFFE ABRUFEN
+// Holt die Liste aller Schiffe vom Backend
 // Backend: GET /api/ships
-// Response: [{ id, name, x, y }, ...]
+// Response: [{ id, name, x, y, direction, port }, ...]
 // ============================================
 export async function getShips() {
     try {
         const response = await fetch(`${API}/ships`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
+            method: "GET", // HTTP GET Methode
+            headers: { "Content-Type": "application/json" } // Erwarte JSON als Antwort
         });
-        if (!response.ok) return [];
-        const text = await response.text();
-        return JSON.parse(text);
+        if (!response.ok) return []; // Bei Fehler leeres Array zurückgeben
+        const text = await response.text(); // Hole die Antwort als Text
+        return JSON.parse(text); // Parse den Text als JSON und gib das Array zurück
     } catch (error) {
         console.error("Fehler beim Abrufen der Schiffe:", error);
-        return [];
+        return []; // Bei Netzwerkfehler leeres Array zurückgeben
     }
 }
 
 // ============================================
 // SCHIFF ERSTELLEN
+// Erstellt ein neues Schiff an der angegebenen Position
 // Backend: POST /api/create
 // Body: { name, x, y, submarineport, direction }
 // ============================================
 export async function createShip(name, x, y, direction, submarineport) {
     try {
         const response = await fetch(`${API}/create`, {
-            method: "POST",
+            method: "POST", // HTTP POST Methode für neue Ressourcen
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "application/json", // Sende JSON-Daten
             },
-            body: JSON.stringify({
-                name: name,
-                x: x,
-                y: y,
-                submarineport: submarineport,
-                direction: direction
+            body: JSON.stringify({ // Konvertiere JavaScript-Objekt zu JSON-String
+                name: name,               // Name des Schiffs
+                x: x,                     // X-Koordinate auf der Karte
+                y: y,                     // Y-Koordinate auf der Karte
+                submarineport: submarineport, // Port für das Submarine
+                direction: direction      // Anfangsrichtung (z.B. "S" für Süden)
             }),
         });
         console.log("Schiff erstellt!");
-        return response.ok;
+        return response.ok; // Gib true zurück wenn erfolgreich (Status 200-299)
     } catch (err) {
         console.error("Fehler beim Erstellen:", err);
-        return false;
+        return false; // Bei Fehler false zurückgeben
     }
 }
 
 // ============================================
 // SCHIFF NAVIGIEREN (Steuerung)
+// Sendet Steuerungsbefehle an das Schiff
 // Backend: POST /api/navigate
 // Body: { shipid, rudder, course }
 //
-// Rudder (Ruder): "Left", "Center", "Right"
-// Course (Fahrt): "Forward", "Backward"
+// Rudder (Ruder): "Left" = links lenken, "Center" = geradeaus, "Right" = rechts lenken
+// Course (Fahrt): "Forward" = vorwärts fahren, "Backward" = rückwärts fahren
 // ============================================
 export async function navigateShip(shipId, rudder, course) {
     try {
@@ -64,9 +71,9 @@ export async function navigateShip(shipId, rudder, course) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                shipid: shipId,
-                rudder: rudder,
-                course: course
+                shipid: shipId,  // ID des zu steuernden Schiffs
+                rudder: rudder,  // Ruderstellung: "Left", "Center", "Right"
+                course: course   // Fahrtrichtung: "Forward", "Backward"
             })
         });
         return response.ok;
@@ -78,32 +85,33 @@ export async function navigateShip(shipId, rudder, course) {
 
 // ============================================
 // SCHIFF IN RICHTUNG BEWEGEN (für Kompass)
-// Mappt Kompass-Richtungen auf Rudder + Course
+// Wandelt Himmelsrichtungen in Rudder/Course-Befehle um
+// Diese Funktion ist ein Wrapper um navigateShip()
 // ============================================
 export async function moveShipDirection(shipId, direction) {
-    // Kompass-Richtung -> Rudder mapping
-    // N = Vorwärts geradeaus
-    // S = Rückwärts geradeaus
-    // O = Vorwärts rechts
-    // W = Vorwärts links
+    // Mapping von Kompass-Richtungen zu Backend-Befehlen
+    // Jede Richtung wird übersetzt in Ruder + Fahrtrichtung
     const directionMap = {
-        "N": { rudder: "Center", course: "Forward" },
-        "S": { rudder: "Center", course: "Backward" },
-        "O": { rudder: "Right", course: "Forward" },
-        "W": { rudder: "Left", course: "Forward" },
+        "N": { rudder: "Center", course: "Forward" },   // Norden = geradeaus vorwärts
+        "S": { rudder: "Center", course: "Backward" },  // Süden = geradeaus rückwärts
+        "O": { rudder: "Right", course: "Forward" },    // Osten = rechts vorwärts
+        "W": { rudder: "Left", course: "Forward" },     // Westen = links vorwärts
         "NORTH": { rudder: "Center", course: "Forward" },
         "SOUTH": { rudder: "Center", course: "Backward" },
         "EAST": { rudder: "Right", course: "Forward" },
         "WEST": { rudder: "Left", course: "Forward" }
     };
 
+    // Hole das Mapping für die Richtung, falls nicht gefunden nutze Default (geradeaus)
     const mapping = directionMap[direction] || { rudder: "Center", course: "Forward" };
+    // Rufe die eigentliche navigate-Funktion auf
     return navigateShip(shipId, mapping.rudder, mapping.course);
 }
 
 // ============================================
 // RADAR AKTIVIEREN
 // Radarmessung der umliegenden Sektoren anfordern
+// Zeigt was sich in den benachbarten Feldern befindet
 // Backend: POST /api/radar
 // Body: { shipid }
 // ============================================
@@ -112,7 +120,7 @@ export async function radar(shipId) {
         const response = await fetch(`${API}/radar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shipid: "#3#Test" })
+            body: JSON.stringify({ shipid: "#3#Test" }) // Sende Schiffs-ID
         });
         console.log("Radar aktiviert!");
         return response.ok;
@@ -124,7 +132,8 @@ export async function radar(shipId) {
 
 // ============================================
 // SCAN AKTIVIEREN
-// Scan des aktuellen Sektors
+// Scannt den aktuellen Sektor auf Schätze/Objekte
+// Im Gegensatz zu Radar nur das aktuelle Feld, aber detaillierter
 // Backend: POST /api/scan
 // Body: { shipid }
 // ============================================
@@ -133,7 +142,7 @@ export async function scan(shipId) {
         const response = await fetch(`${API}/scan`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shipid: shipId })
+            body: JSON.stringify({ shipid: shipId }) // Sende Schiffs-ID
         });
         console.log("Scan aktiviert!");
         return response.ok;
@@ -145,7 +154,8 @@ export async function scan(shipId) {
 
 // ============================================
 // SCHIFF ZERSTÖREN/LÖSCHEN (Exit)
-// Schiff aus dem Spiel nehmen, inklusive eventuell ausgesetzter Tauchroboter
+// Entfernt das Schiff aus dem Spiel
+// Inklusive eventuell ausgesetzter Tauchroboter
 // Backend: POST /api/kill
 // Body: { shipid }
 // ============================================
@@ -165,7 +175,8 @@ export async function killShip(shipId) {
 }
 
 // ============================================
-// TAUCHROBOTER STARTEN
+// TAUCHROBOTER/SUBMARINE STARTEN
+// Lässt den Tauchroboter vom Schiff aus ins Wasser
 // Backend: POST /api/startsubmarine
 // Body: { shipid }
 // ============================================
@@ -185,26 +196,36 @@ export async function startSubmarine(shipId) {
 }
 
 // ============================================
-// ALIASE für Kompatibilität
+// ALIAS-FUNKTIONEN
+// Diese Funktionen sind alternative Namen für bessere Lesbarkeit
+// Sie rufen intern die eigentlichen Funktionen auf
 // ============================================
+
+// Alias für killShip - wird in der UI als "Schiff löschen" verwendet
 export async function deleteShip(shipId) {
     return killShip(shipId);
 }
 
+// Alias für startSubmarine - wird in der UI als "Taucher ablassen" verwendet
 export async function deployDiver(shipId) {
     return startSubmarine(shipId);
 }
 
-// Taucher/Submarines - gibt erstmal leeres Array zurück
+// ============================================
+// TAUCHER/SUBMARINES ABRUFEN
+// Gibt aktuell ein leeres Array zurück
 // TODO: Backend-Endpunkt für Submarines hinzufügen wenn nötig
+// ============================================
 export async function getDivers() {
-    return [];
+    return []; // Platzhalter - muss mit echtem Backend-Endpunkt verbunden werden
 }
 
+// Weiterer Alias für startSubmarine
 export async function deploySubmarin(shipId) {
     return startSubmarine(shipId);
 }
 
+// Platzhalter für Submarine-Liste
 export async function getSubmarin() {
-    return [];
+    return []; // Platzhalter - muss mit echtem Backend-Endpunkt verbunden werden
 }
