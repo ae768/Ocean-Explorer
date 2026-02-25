@@ -1,6 +1,6 @@
 import { useState } from "react" // React Hook für lokalen State
 import "./ControlPanel.css" // Styling für das Steuerungspanel
-import {navigateShip, scan} from "./api"; // API-Funktionen für Navigation und Scan
+import {navigateShip, scan, radar} from "./api"; // API-Funktionen für Navigation, Scan und Radar
 
 // ControlPanel Komponente - Enthält den Kompass und alle Steuerungselemente
 // Props:
@@ -117,6 +117,15 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
                 onClick={onRefresh} // Ruft die übergebene Refresh-Funktion auf
             >
                 🔄 Refresh
+            </button>
+
+            {/* Button zum Aktivieren des Radars */}
+            <button
+                className="radar-btn"
+                onClick={() => selectedShip && radar(selectedShip.id)} // Radar für das ausgewählte Schiff
+                disabled={!selectedShip} // Deaktiviert wenn kein Schiff ausgewählt
+            >
+                📡 Radar
             </button>
 
             {/* Zeigt die aktuelle Position des ausgewählten Schiffs an */}

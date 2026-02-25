@@ -170,7 +170,7 @@ export async function radar(shipId) {
         const response = await fetch(`${API}/radar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shipid: "#3#Test" }) // Sende Schiffs-ID
+            body: JSON.stringify({ shipid: shipId }) // Sende Schiffs-ID
         });
         console.log("Radar aktiviert!");
         return response.ok;
@@ -275,48 +275,11 @@ export async function deployDiver(shipId) {
 
 // ============================================
 // TAUCHER/SUBMARINES ABRUFEN
-// Holt alle aktiven Submarines vom Backend
-// Backend: GET /api/getsubmarines
+// Gibt aktuell ein leeres Array zurück
+// TODO: Backend-Endpunkt für Submarines hinzufügen wenn nötig
 // ============================================
-
 export async function getDivers() {
-    try {
-        console.log("Rufe /api/getsubmarines auf...");
-        const response = await fetch(`${API}/getsubmarines`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
-        });
-
-        console.log("Submarines Response Status:", response.status);
-
-        if (!response.ok) {
-            console.error("Fehler bei getsubmarines - Status:", response.status);
-            return [];
-        }
-
-        const data = await response.json();
-        console.log("Submarines Rohdaten:", data);
-
-        const submarinesFromBackend = data.submarines || [];
-
-        // Transformiere Backend-Format in App-Format
-        const transformedSubmarines = submarinesFromBackend.map(sub => {
-            const pos = parsePosition(sub.position);
-            return {
-                id: sub.submarineId || sub.id,
-                shipId: sub.shipId,
-                x: pos.x,
-                y: pos.y,
-                direction: sub.direction
-            };
-        });
-
-        console.log("Transformierte Submarines:", transformedSubmarines);
-        return transformedSubmarines;
-    } catch (error) {
-        console.error("Fehler beim Abrufen der Submarines:", error);
-        return [];
-    }
+    return []; // Platzhalter - muss mit echtem Backend-Endpunkt verbunden werden
 }
 
 // Weiterer Alias für startSubmarine

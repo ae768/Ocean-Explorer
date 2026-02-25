@@ -238,6 +238,36 @@
     transform: translateY(0);
 }
 
+/* Radar Button */
+.radar-btn {
+    width: 100%;
+    background: linear-gradient(145deg, #9c27b0, #7b1fa2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+}
+
+.radar-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.6);
+}
+
+.radar-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.radar-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* Schiff-Info */
 .ship-info {
     background: rgba(0, 0, 0, 0.3);
