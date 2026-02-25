@@ -10,7 +10,8 @@ import {navigateShip, scan} from "./api"; // API-Funktionen für Navigation und 
 //   - ships: Liste aller verfügbaren Schiffe
 //   - onSelectShip: Callback wenn ein Schiff ausgewählt wird
 //   - onDeleteShip: Callback zum Löschen eines Schiffs
-export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDiver, ships, onSelectShip, onDeleteShip }) {
+//   - onRefresh: Callback für manuellen Refresh der Daten
+export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDiver, ships, onSelectShip, onDeleteShip, onRefresh }) {
     const [direction, setDirection] = useState(0) // Aktuelle Richtung in Grad (0 = Nord, 90 = Ost, etc.)
 
     // Array mit allen 8 Kompass-Richtungen
@@ -31,11 +32,13 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
     ]
 
     // Wird aufgerufen wenn ein Kompass-Button geklickt wird
-    function handleDirection(dir) {
+    async function handleDirection(dir) {
         setDirection(dir.angle) // Aktualisiere die angezeigte Richtung
         if (selectedShip) {
             // Sende Navigationsbefehl ans Backend mit Ruder und Fahrtrichtung
-            navigateShip(selectedShip.id, dir.name)
+            await navigateShip(selectedShip.id, dir.name)
+            // Nach Navigation automatisch Daten neu laden
+            if (onRefresh) onRefresh()
         }
     }
 
@@ -106,6 +109,14 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
                 disabled={!selectedShip?.id} // Deaktiviert wenn kein Schiff ausgewählt oder keine ID vorhanden
             >
                 🗑️ Schiff löschen
+            </button>
+
+            {/* Button zum manuellen Refresh der Daten */}
+            <button
+                className="refresh-btn"
+                onClick={onRefresh} // Ruft die übergebene Refresh-Funktion auf
+            >
+                🔄 Refresh
             </button>
 
             {/* Zeigt die aktuelle Position des ausgewählten Schiffs an */}

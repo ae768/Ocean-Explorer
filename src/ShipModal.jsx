@@ -81,7 +81,7 @@ export default function ShipModal({ x, y, onClose, onCreateShip, onDeleteShip, e
                                 placeholder="Port eingeben..."
                                 value={port}
                                 onChange={e => setPort(parseInt(e.target.value) || "")} // Parse als Zahl oder leer
-                                min="1000"   // Minimaler Port-Wert
+                                min="100"   // Minimaler Port-Wert
                                 max="65535"  // Maximaler Port-Wert (höchster gültiger Port)
                             />
                         </div>

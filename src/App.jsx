@@ -6,7 +6,7 @@ import ShipDashboard from "./ShipDashboard" // Dashboard für Schiff-Übersicht 
 import { getShips, moveShipDirection, deployDiver, getDivers, createShip, deleteShip, navigateShip } from "./api" // API-Funktionen für Backend-Kommunikation
 import "./App.css" // Styling für die App
 
-const BASE_PORT = 7000 // Startport für neue Schiffe
+const BASE_PORT = 300 // Startport für neue Schiffe
 
 export default function App() {
     // State-Variablen für die App
@@ -19,7 +19,7 @@ export default function App() {
 
     // Funktion um den nächsten freien Port zu finden
     function getNextAvailablePort() {
-        let port = BASE_PORT // Starte bei 7000
+        let port = BASE_PORT // Starte bei 300
         while (usedPorts.has(port)) { // Solange der Port schon verwendet wird...
             port++ // ...gehe zum nächsten Port hier wird der Port immer um 1 erhöht
         }
@@ -39,12 +39,16 @@ export default function App() {
         }
     }
 
-    // useEffect Hook - wird beim Start der App und bei Änderungen ausgeführt
+    // useEffect Hook - wird beim Start der App ausgeführt (nur einmal)
     useEffect(() => {
-        load()
-        const timer = setInterval(load, 200) // Startet einen Timer der alle 200ms die Daten neu lädt
-        return () => clearInterval(timer)
+        load() // Lade Daten nur einmal beim Start
     }, []) // Leeres Array = wird nur beim ersten Rendern ausgeführt
+
+    // Manueller Refresh-Button Handler
+    async function handleRefresh() {
+        console.log("Manueller Refresh ausgelöst");
+        await load();
+    }
 
     // Schiff in eine Richtung bewegen
     async function handleMoveDirection(direction) {
@@ -102,6 +106,7 @@ export default function App() {
                     onMoveDirection={handleMoveDirection} // Callback für Kompass-Steuerung
                     onDeployDiver={handleDeployDiver} // Callback für Submarine-Start
                     onDeleteShip={handleDeleteShip} // Callback zum Löschen eines Schiffs
+                    onRefresh={handleRefresh} // Callback für manuellen Refresh
                 />
 
                 {/* Karte in der Mitte - zeigt das Spielfeld mit Schiffen und Tauchern */}

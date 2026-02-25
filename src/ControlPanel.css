@@ -214,6 +214,30 @@
     transform: none;
 }
 
+/* Refresh Button */
+.refresh-btn {
+    width: 100%;
+    background: linear-gradient(145deg, #4caf50, #388e3c);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.refresh-btn:active {
+    transform: translateY(0);
+}
+
 /* Schiff-Info */
 .ship-info {
     background: rgba(0, 0, 0, 0.3);
