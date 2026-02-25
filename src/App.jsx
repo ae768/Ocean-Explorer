@@ -3,7 +3,7 @@ import Map from "./Map" // Karten-Komponente importieren
 import ControlPanel from "./ControlPanel" // Steuerungspanel-Komponente importieren
 import ShipModal from "./ShipModal" // Modal-Dialog für Schiff-Erstellung importieren
 import ShipDashboard from "./ShipDashboard" // Dashboard für Schiff-Übersicht importieren
-import { getShips, moveShipDirection, deployDiver, getDivers, createShip, deleteShip, navigateShip } from "./api" // API-Funktionen für Backend-Kommunikation
+import { getShips, moveShipDirection, deployDiver, createShip, deleteShip, navigateShip } from "./api" // API-Funktionen für Backend-Kommunikation
 import "./App.css" // Styling für die App
 
 const BASE_PORT = 300 // Startport für neue Schiffe
@@ -28,15 +28,27 @@ export default function App() {
 
     // Lädt alle Schiffe und Taucher vom Backend
     async function load() {
+        console.log("=== LOAD START ===");
         const newShips = await getShips() // holt alle schiffe vom backend
+        console.log("Geladene Schiffe:", newShips);
         setShips(newShips) // Aktualisiere den Ships-State
-        setDivers(await getDivers()) // Hole und setze alle Taucher
+
+        // Berechne die Gesamtanzahl der aktiven Submarines aus allen Schiffen
+        const totalSubmarines = newShips.reduce((sum, ship) => {
+            console.log(`Schiff ${ship.name}: activeSubmarines = ${ship.activeSubmarines}`);
+            return sum + (ship.activeSubmarines || 0);
+        }, 0)
+        console.log("Total Submarines:", totalSubmarines);
+        // Erstelle ein Array mit der Länge der Submarines für die Anzeige
+        setDivers(Array(totalSubmarines).fill({ active: true }))
+
         // Aktualisiere das ausgewählte Schiff mit neuen Koordinaten
         if (selectedShip) {
             const updated = newShips.find(s => s.id === selectedShip.id) // Suche das ausgewählte Schiff in der neuen Liste
             if (updated) setSelectedShip(updated) // wenn ein ship gefunden wird, aktuallisieren
             else setSelectedShip(null) // wenn nix gefunden wird oder gelöscht wird wird der wert auf null gesetzt
         }
+        console.log("=== LOAD END ===");
     }
 
     // useEffect Hook - wird beim Start der App ausgeführt (nur einmal)

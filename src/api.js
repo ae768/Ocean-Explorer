@@ -57,7 +57,7 @@ export async function getShips() {
         // Transformiere Backend-Format in App-Format
         const transformedShips = shipsFromBackend.map(ship => {
             const pos = parsePosition(ship.position);
-            console.log(`Schiff "${ship.name}": position="${ship.position}" → x=${pos.x}, y=${pos.y}`);
+            console.log(`Schiff "${ship.name}": position="${ship.position}" → x=${pos.x}, y=${pos.y}, activeSubmarines=${ship.activeSubmarines}`);
             return {
                 id: ship.shipId,           // Backend: shipId → App: id
                 name: ship.name,
@@ -66,7 +66,8 @@ export async function getShips() {
                 direction: ship.direction,
                 course: ship.course,
                 rudder: ship.rudder,
-                crash: ship.crash
+                crash: ship.crash,
+                activeSubmarines: ship.activeSubmarines || 0  // Anzahl aktiver Submarines
             };
         });
 
@@ -244,11 +245,17 @@ export async function killShip(shipId) {
 // ============================================
 export async function startSubmarine(shipId) {
     try {
+        console.log("Starte Tauchroboter für Schiff:", shipId);
         const response = await fetch(`${API}/startsubmarine`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ shipid: shipId })
         });
+        console.log("Tauchroboter Response Status:", response.status);
+
+        // Kurzer Delay um dem Backend Zeit zu geben, den Submarine-Counter zu aktualisieren
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         console.log("Tauchroboter gestartet!");
         return response.ok;
     } catch (error) {
