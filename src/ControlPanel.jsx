@@ -35,7 +35,7 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
         setDirection(dir.angle) // Aktualisiere die angezeigte Richtung
         if (selectedShip) {
             // Sende Navigationsbefehl ans Backend mit Ruder und Fahrtrichtung
-            navigateShip(ships, dir.rudder, dir.course)
+            navigateShip(selectedShip.id, dir.name)
         }
     }
 
@@ -50,7 +50,7 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
                     value={selectedShip?.id || ""} // Zeige ID des ausgewählten Schiffs oder leer
                     onChange={(e) => {
                         // Finde das Schiff-Objekt anhand der ausgewählten ID
-                        const ship = ships.find(s => s.id === parseInt(e.target.value))
+                        const ship = ships.find(s => String(s.id) === e.target.value)
                         onSelectShip(ship) // Rufe den Callback mit dem gefundenen Schiff auf
                     }}
                 >
@@ -102,8 +102,8 @@ export default function ControlPanel({ selectedShip, onMoveDirection, onDeployDi
             {/* Button zum Löschen des ausgewählten Schiffs */}
             <button
                 className="delete-ship-btn"
-                onClick={() => onDeleteShip(selectedShip.id)} // Löscht das Schiff mit der aktuellen ID
-                disabled={!selectedShip} // Deaktiviert wenn kein Schiff ausgewählt
+                onClick={() => selectedShip?.id && onDeleteShip(selectedShip.id)} // Löscht das Schiff mit der aktuellen ID
+                disabled={!selectedShip?.id} // Deaktiviert wenn kein Schiff ausgewählt oder keine ID vorhanden
             >
                 🗑️ Schiff löschen
             </button>

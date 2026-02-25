@@ -9,21 +9,72 @@ const API = `${BACKEND_URL}/api` // Basis-URL für alle API-Aufrufe
 // ============================================
 // ALLE SCHIFFE ABRUFEN
 // Holt die Liste aller Schiffe vom Backend
-// Backend: GET /api/ships
-// Response: [{ id, name, x, y, direction, port }, ...]
+// Backend: GET /api/getships
+// Response: { type: "allships", ships: [{ shipId, name, position, direction, ... }, ...] }
 // ============================================
+
+// Hilfsfunktion um Position-String zu parsen (z.B. "Vec2d{x=5, y=10}" → {x: 5, y: 10})
+function parsePosition(positionString) {
+    if (!positionString) return { x: 0, y: 0 };
+
+    // Format: "Vec2d{x=5, y=10}" oder ähnlich mit = Zeichen
+    const matchEquals = positionString.match(/x\s*=\s*(\d+).*y\s*=\s*(\d+)/);
+    if (matchEquals) {
+        return { x: parseInt(matchEquals[1]), y: parseInt(matchEquals[2]) };
+    }
+
+    // Format: "Vec2d(5, 10)" oder "(5, 10)" oder "5, 10"
+    const matchParens = positionString.match(/\(?(\d+)[,\s]+(\d+)\)?/);
+    if (matchParens) {
+        return { x: parseInt(matchParens[1]), y: parseInt(matchParens[2]) };
+    }
+
+    console.warn("Konnte Position nicht parsen:", positionString);
+    return { x: 0, y: 0 };
+}
+
 export async function getShips() {
     try {
-        const response = await fetch(`${API}/ships`, {
-            method: "GET", // HTTP GET Methode
-            headers: { "Content-Type": "application/json" } // Erwarte JSON als Antwort
+        console.log("Rufe /api/getships auf...");
+        const response = await fetch(`${API}/getships`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
         });
-        if (!response.ok) return []; // Bei Fehler leeres Array zurückgeben
-        const text = await response.text(); // Hole die Antwort als Text
-        return JSON.parse(text); // Parse den Text als JSON und gib das Array zurück
+
+        console.log("Response Status:", response.status, response.statusText);
+
+        if (!response.ok) {
+            console.error("Fehler bei getShips - Status:", response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        console.log("Rohdaten vom Backend:", data);
+
+        const shipsFromBackend = data.ships || [];
+        console.log("Anzahl Schiffe:", shipsFromBackend.length);
+
+        // Transformiere Backend-Format in App-Format
+        const transformedShips = shipsFromBackend.map(ship => {
+            const pos = parsePosition(ship.position);
+            console.log(`Schiff "${ship.name}": position="${ship.position}" → x=${pos.x}, y=${pos.y}`);
+            return {
+                id: ship.shipId,           // Backend: shipId → App: id
+                name: ship.name,
+                x: pos.x,                  // Backend: position String → App: x
+                y: pos.y,                  // Backend: position String → App: y
+                direction: ship.direction,
+                course: ship.course,
+                rudder: ship.rudder,
+                crash: ship.crash
+            };
+        });
+
+        console.log("Transformierte Schiffe:", transformedShips);
+        return transformedShips;
     } catch (error) {
         console.error("Fehler beim Abrufen der Schiffe:", error);
-        return []; // Bei Netzwerkfehler leeres Array zurückgeben
+        return [];
     }
 }
 
@@ -65,15 +116,14 @@ export async function createShip(name, x, y, direction, submarineport) {
 // Rudder (Ruder): "Left" = links lenken, "Center" = geradeaus, "Right" = rechts lenken
 // Course (Fahrt): "Forward" = vorwärts fahren, "Backward" = rückwärts fahren
 // ============================================
-export async function navigateShip(shipId, rudder, course) {
+export async function navigateShip(shipId, name) {
     try {
         const response = await fetch(`${API}/navigate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 shipid: shipId,  // ID des zu steuernden Schiffs
-                rudder: rudder,  // Ruderstellung: "Left", "Center", "Right"
-                course: course   // Fahrtrichtung: "Forward", "Backward"
+                direction: name,
             })
         });
         return response.ok;
@@ -161,12 +211,24 @@ export async function scan(shipId) {
 // ============================================
 export async function killShip(shipId) {
     try {
+        console.log("Lösche Schiff mit ID:", shipId);
+        console.log("Request Body:", JSON.stringify({ shipid: shipId }));
+
         const response = await fetch(`${API}/kill`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ shipid: shipId })
         });
-        console.log("Schiff gelöscht!");
+
+        console.log("Kill Response Status:", response.status, response.statusText);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Kill Error Response:", errorText);
+        } else {
+            console.log("Schiff gelöscht!");
+        }
+
         return response.ok;
     } catch (error) {
         console.error("Fehler beim Löschen des Schiffs:", error);
